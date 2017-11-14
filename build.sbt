@@ -8,6 +8,6 @@ settings(
 				version      := "0.1.0-SNAPSHOT"
 				)),
 		name := "Etimo slack static blogger",
-		libraryDependencies += scalaTest % Test
+		libraryDependencies += scalaTest % Test,
 		libraryDependencies += "com.github.gilbertw1" %% "slack-scala-client" % "0.2.2"
 	)
