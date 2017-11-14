@@ -1,6 +1,16 @@
 package se.etimo.slack
 
+import com.typesafe.config.ConfigFactory , slack.api.BlockingSlackApiClient, akka.actor.ActorSystem
+
  object Slackread {
-   val settingsFile = File("./settings.json");
+   implicit val system = ActorSystem("etimoslack")
+   val token = ConfigFactory.load().getString("slacktoken")
+   val blockingSlackClient = BlockingSlackApiClient(token);
+   blockingSlackClient.listChannels().foreach(c => print(c.name))
+
+   def listChannels = {
+
+
+   }
 
 }
