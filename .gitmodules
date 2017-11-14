@@ -1,0 +1,3 @@
+[submodule "jekyll"]
+	path = jekyll
+	url = https://github.com/jekyll/jekyll
