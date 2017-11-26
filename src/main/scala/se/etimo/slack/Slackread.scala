@@ -1,5 +1,6 @@
 package se.etimo.slack
 
+import java.io.File
 import java.text.SimpleDateFormat
 
 import com.typesafe.config.ConfigFactory
@@ -9,24 +10,33 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 import scala.collection.mutable
-import scala.reflect.io.File
 
 object Slackread {
+  case class SlackConfig( token:String, slackChannel:String,
+                     directory:String, baseTitle:String, startDate:String,client:BlockingSlackApiClient)
 
   implicit val system = ActorSystem("etimoslack")
   val keyformat = DateTimeFormat.forPattern("YYYY-MM-dd")
   val postFormat = DateTimeFormat.forPattern("YYYY-MM-dd hh:mm ss")
-  val token = ConfigFactory.load().getString("slackToken")
-  val slackChannel = ConfigFactory.load().getString("slackChannel")
-  val directory = ConfigFactory.load().getString("postDirectory")
-  val baseTitle = ConfigFactory.load().getString("baseTitle")
-  val startDate = ConfigFactory.load().getString("startDate")
-  val blockingSlackClient = BlockingSlackApiClient(token)
 
   case class Message(val date:DateTime,val name:String,val text:String,val dayKey:String)
+  def readConfig(configFile:String="application.conf"): SlackConfig ={
+    val config = ConfigFactory.parseFile(new File(configFile))
+    val token = config.getString("slackToken")
+    val slackChannel = config.getString("slackChannel")
+    val directory = config.getString("postDirectory")
+    val baseTitle = config.getString("baseTitle")
+    val startDate = config.getString("startDate")
+
+    val blockingSlackClient = BlockingSlackApiClient(token)
+    return SlackConfig(token,slackChannel
+      ,directory,baseTitle
+      ,startDate,blockingSlackClient)
+
+  }
 
   def writePost(dateText:String,baseDir: String, title: String, body: String): Unit = {
-    val file = File(baseDir+"/"+dateText+"-"+title.replace(" ","-")+".MARKDOWN")
+    val file = scala.reflect.io.File(baseDir+"/"+dateText+"-"+title.replace(" ","-")+".MARKDOWN")
     val yamlHead ="---\nlayout: post\ntitle: "+title+"\n---\n"
     val finalPost = yamlHead+
     body
@@ -34,18 +44,18 @@ object Slackread {
     file.writeAll(finalPost)
 
   }
-
-  def buildBlogPages = {
-    val getFrom = keyformat.parseDateTime(startDate);
-    val channel = blockingSlackClient.listChannels()
-      .find(c => c.name.equals(slackChannel)).get
-    val messages =  blockingSlackClient
+  def buildBlogPages(configFile:String ="application.conf") = {
+    val config = readConfig(configFile)
+    val getFrom = keyformat.parseDateTime(config.startDate);
+    val channel = config.client.listChannels()
+      .find(c => c.name.equals(config.slackChannel)).get
+    val messages =  config.client
       .getChannelHistory(channel.id).messages
     val uidNameMap  = mutable.HashMap[String,String]()
     val betterMessages = messages.map(f = m => {
       val userId = (m \ "user").as[String]
       val name = uidNameMap.get(userId).getOrElse(
-        blockingSlackClient.getUserInfo(userId).name)
+        config.client.getUserInfo(userId).name)
       val text = (m \ "text").as[String]
       uidNameMap.put(userId,name)
       val date = getDateForTs((m \ "ts").as[String])
@@ -64,8 +74,8 @@ object Slackread {
       val builder = mutable.StringBuilder.newBuilder
       e._2.sortBy(m=>m.date.toDate.getTime)
         .foreach(m => builder.append(markdownMessage(m,uidNameMap)))
-      writePost(e._1,directory
-        ,s"$baseTitle "+e._1,builder.toString())
+      writePost(e._1,config.directory
+        ,s"${config.baseTitle} ${e._1}",builder.toString())
     })
   }
 

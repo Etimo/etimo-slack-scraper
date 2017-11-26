@@ -11,3 +11,4 @@ settings(
 		libraryDependencies += scalaTest % Test,
 		libraryDependencies += "com.github.gilbertw1" %% "slack-scala-client" % "0.2.2"
 	)
+fork in run := true
