@@ -10,6 +10,9 @@ settings(
 				)),
 		name := "Etimo slack static blogger",
 		libraryDependencies += scalaTest % Test,
-		libraryDependencies += "com.github.gilbertw1" %% "slack-scala-client" % "0.2.2"
+		libraryDependencies += "com.github.gilbertw1" %% "slack-scala-client" % "0.2.2",
+mainClass in Compile := Some("Main")
+
 	)
 fork in run := true
+
