@@ -1,5 +1,5 @@
 import se.etimo.commandline.CommandLineOption
-import se.etimo.slack.Slackread
+import se.etimo.slack.SlackRead
 
 import scala.reflect.io.File
 object Main extends App {
@@ -8,7 +8,7 @@ object Main extends App {
     List[String]("-c","--config")
     ,1
     ,"Specify the location of the configuration file to use."
-    ,Option(list =>{Slackread.buildBlogPages(list.head)})
+    ,Option(list =>{SlackRead.buildBlogPages(list.head)})
     ,Option(list =>
       list.size > 0 && File(list(0)).exists))()
 

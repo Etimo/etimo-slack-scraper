@@ -10,7 +10,8 @@ settings(
 				)),
 		name := "Etimo slack static blogger",
 		libraryDependencies += scalaTest % Test,
-		libraryDependencies += "com.github.gilbertw1" %% "slack-scala-client" % "0.2.2",
+		libraryDependencies += "com.vdurmont"% "emoji-java" % "4.0.0" withJavadoc() withSources(),
+		libraryDependencies += "com.github.gilbertw1" %% "slack-scala-client" % "0.2.2" withJavadoc() withSources(),
 mainClass in Compile := Some("Main")
 
 	)
