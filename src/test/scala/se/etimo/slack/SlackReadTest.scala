@@ -23,8 +23,10 @@ class SlackReadTest extends FlatSpec with Matchers {
   SlackSetup("No"
     ,"Token"
     ,"directory either"
+    ,"no asset directory either"
     ,"channel"
-    ,"DATENOTNNEDDED"
+    ,DateTime.now()
+    ,"Monday"
     ,null)
   "Making views" should "merge" in {
 

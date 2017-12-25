@@ -11,6 +11,7 @@ Run the application with a -c flag pointing to your config.
 	"slackToken":"NotARealSlackTockenAtAll,It'sFake",
 	"slackChannel":"etimo_external",
 	"postDirectory":"/home/erik/code/etimo-strap/_posts",
+	"assetDirectory":"/home/erik/code/etimo-strap/assets",
 	"startDate":"2017-11-20",
 	"baseTitle":"Teknik-chatt",
 	"blogPeriodBreak":"daily",
@@ -21,6 +22,7 @@ Run the application with a -c flag pointing to your config.
 - slackToken: An api key for the user that will be used to scrape the channel.
 - slackChannel: The name of the channel to scrape
 - postDirectory: The posts directory of your jekyllrb site. Or any other directory to save the files to.
+- assetDirectory: Images and thumbnails are downloaded here 
 - startDate: Date in YYYY-MM-dd format, messages sent in the channel on this day or later will be included in posts.
 - baseTitle: This is the prefix to all automated post titles.
 

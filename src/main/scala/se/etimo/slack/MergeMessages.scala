@@ -7,34 +7,30 @@ import se.etimo.slack.SlackRead.Message
 
 object MergeMessages{
 
-  private case class MergeMessage(firstTime:DateTime, lastTime:DateTime, name:String, text:String)
+  private case class MergeMessage(messages:List[Message])
   private val startTime:DateTime = new DateTime(0);
- private val emptyMessage=MergeMessage(startTime,startTime,"NONAME","NOTEXT")
 
-  def mergeMessages(timeDiff:Integer,messages:Seq[Message]): Seq[Message] = {
-    val mergedMessages = ListBuffer.empty[MergeMessage]
-    var bufferMessage = emptyMessage
+  def mergeMessages(timeDiff:Integer,messages:Seq[Message]): List[List[Message]] = {
+    val mergedMessages = ListBuffer.empty[List[Message]]
+    var bufferMessages  = ListBuffer[Message]()
       messages.sortBy(m => m.date.toDate.getTime).foreach(m => {
-        if(checkMerge(timeDiff,bufferMessage,m)){
-          bufferMessage=merge(bufferMessage,m)
+        if(checkMerge(timeDiff,bufferMessages.toList,m)){
+          bufferMessages+=m
         }
         else{
-         if(bufferMessage != emptyMessage) {mergedMessages += bufferMessage}
-          bufferMessage= MergeMessage(m.date,m.date,m.name,m.text)
+          mergedMessages+=bufferMessages.toList
+          bufferMessages.clear()
+          bufferMessages+=m
         }
     })
-    mergedMessages.map(mm => Message(mm.firstTime,mm.name,mm.text,"xx"))
+    if(!mergedMessages.contains(bufferMessages.toList))mergedMessages+=bufferMessages.toList
+    return mergedMessages.toList
   }
-  def checkMerge(timeDiff:Integer,messageOne:MergeMessage,messageTwo:Message):Boolean = {
+  def checkMerge(timeDiff:Integer,bufferMessages:List[Message],messageTwo:Message):Boolean = {
+    if(bufferMessages.isEmpty) return true
+     val messageOne = bufferMessages.last
       messageOne.name.equals(messageTwo.name) &&
-      messageTwo.date.toDate.getTime - messageOne.lastTime.toDate.getTime() < timeDiff
-  }
-  private def merge(mergeMessage:MergeMessage,message:Message): MergeMessage ={
-    MergeMessage(mergeMessage.firstTime,
-      message.date,
-      message.name,
-      mergeMessage.text+"\n  "+message.text,
-      )
+      messageTwo.date.toDate.getTime - messageOne.date.toDate.getTime() < timeDiff
   }
 
 

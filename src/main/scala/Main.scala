@@ -8,7 +8,7 @@ object Main extends App {
     List[String]("-c","--config")
     ,1
     ,"Specify the location of the configuration file to use."
-    ,Option(list =>{SlackRead.buildBlogPages(list.head)})
+    ,Option(list =>{SlackRead(list.head).buildBlogPages()})
     ,Option(list =>
       list.size > 0 && File(list(0)).exists))()
 

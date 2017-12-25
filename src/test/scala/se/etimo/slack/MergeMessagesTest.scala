@@ -16,13 +16,12 @@ class MergeMessagesTest extends FlatSpec with Matchers {
     Message(baseDate.withDurationAdded(65,1),"Johan","With Eriks messages!", "xx"),
   )
   val mergedMessages = List(
-    Message(baseDate,"Erik","I\n  should\n  merge\n  !","xx"),
-    Message(baseDate.withDurationAdded(60,1),"Erik","I shouldn't merge!", "xx"),
-    Message(baseDate.withDurationAdded(60,1),"Johan","I shouldn't merge!\n  With Eriks messages!", "xx"),
+     List(messages(0),messages(1),messages(2),messages(3)),
+    List(messages(4)),List(messages(5),messages(6))
   )
 
     val merged = MergeMessages.mergeMessages(10,messages)
-    "Messages close in tim by a single person" should "merge" in {
+    "Messages close in time by a single person" should "merge" in {
     merged(0) should be (mergedMessages(0))
     merged(1) should be (mergedMessages(1))
     merged(2) should be (mergedMessages(2))
