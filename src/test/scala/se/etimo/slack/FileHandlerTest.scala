@@ -27,7 +27,7 @@ class FileHandlerTest extends FlatSpec with Matchers {
      "\"ts\":\"1511244977.000193\"}")
 val slackFake =
   SlackSetup("No"
-    ,"xoxp-4147165470-263761019252-270089461457-245707ba23e9e1590210e7d51aa4442d"
+    ,"NotAGoodPlaceToJustAddAtokenRealQuick"
     ,"directory either"
     ,"no asset directory either"
     ,"channel"
