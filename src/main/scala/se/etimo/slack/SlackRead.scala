@@ -5,7 +5,7 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import slack.api.BlockingSlackApiClient
 import akka.actor.ActorSystem
-import org.joda.time.{DateTime, Duration}
+import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.api.libs.json.JsValue
 import se.etimo.slack.FileHandler.SlackFileInfo
@@ -18,6 +18,8 @@ import scala.math.BigDecimal.RoundingMode
 import scala.util.matching.Regex
 object SlackRead {
   val excerpt_separator ="<!--excerpt-->"
+  val keyFormatBase:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd")
+  val postFormatBase:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-kk hh:mm ss")
   case class SlackSetup(token:String,
                         slackChannel:String,
                         postDirectory:String,
@@ -25,7 +27,11 @@ object SlackRead {
                         baseTitle:String,
                         startDate:DateTime,
                         blogPeriod:String,
-                        client:BlockingSlackApiClient)
+                        client:BlockingSlackApiClient,
+                        timeZone:DateTimeZone,
+                        keyFormat:DateTimeFormatter,
+                        postFormat:DateTimeFormatter,
+                       )
   implicit val system:ActorSystem = ActorSystem("etimoslack")
 
   val weekdays:Map[String,Int] = Map(("monday",1),
@@ -35,8 +41,6 @@ object SlackRead {
     ("friday",5),
     ("saturday",6),
     ("sunday",7))
-  val keyFormat:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd")
-  val postFormat:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd hh:mm ss")
   val postFormatHour:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd hh:mm")
   case class Message(date:DateTime,
                      name:String,
@@ -55,14 +59,14 @@ object SlackRead {
     */
   def getBlogKeyMethod(implicit slackSetup: SlackSetup):(DateTime) => String ={
     slackSetup.blogPeriod match {
-      case "daily" => date:DateTime => date.toString(keyFormat)
+      case "daily" => date:DateTime => date.toString(slackSetup.keyFormat)
       case x if weekdays.contains(x.toLowerCase())=> //Returns a method to find the first matching weekday
         val weekDay = weekdays(x.toLowerCase())
         var first = slackSetup.startDate
         while(first.getDayOfWeek != weekDay){
           first = first.withDurationAdded(Duration.standardDays(1),1).withTimeAtStartOfDay()
         }
-        println(s"First $x is on ${first.toString(keyFormat)}")
+        println(s"First $x is on ${first.toString(slackSetup.keyFormat)}")
         date:DateTime =>{
           if(date.getMillis <= first.getMillis) "0"
           else{
@@ -94,10 +98,11 @@ object SlackRead {
     */
   def getBlogTitleGeneratorFunction(implicit slackSetup: SlackSetup):(DateTime) => String ={
     slackSetup.blogPeriod match {
-      case "daily" => date:DateTime => date.toString(keyFormat)
+      case "daily" => date:DateTime => date.toString(slackSetup.keyFormat)
       case x if weekdays.contains(x.toLowerCase())=> //Returns a method to find the first matching weekday
         date:DateTime =>{
-          date.toString(keyFormat)+" - "+date.withDurationAdded(Duration.standardDays(7),1).toString(keyFormat)
+          date.toString(slackSetup.keyFormat)+" - "+date.withDurationAdded(Duration.standardDays(7),1)
+            .toString(slackSetup.keyFormat)
         }
 
       case x if numeric.pattern.matcher(x).matches() =>
@@ -132,15 +137,21 @@ class SlackRead(configFile:String) {
     val blogPeriod = config.getString("blogPeriodBreak")
     val assetDirectory = config.getString("assetDirectory")
     val startDate = config.getString("startDate")
-
+    val postDateTimeFormat = config.getString("postDateTimeFormat")
+    val timeZoneId = config.getString("timeZoneId")
+    val timeZone = if(timeZoneId == "default") DateTimeZone.getDefault else DateTimeZone.forID(timeZoneId)
     val blockingSlackClient = BlockingSlackApiClient(token)
     SlackSetup(token,slackChannel
       ,directory
       ,assetDirectory
       ,baseTitle
-      ,keyFormat.parseDateTime(startDate)
+      ,keyFormatBase.withZone(timeZone).parseDateTime(startDate)
       ,blogPeriod
-      ,blockingSlackClient)
+      ,blockingSlackClient
+      ,timeZone
+      ,keyFormatBase.withZone(timeZone)
+      ,DateTimeFormat.forPattern(postDateTimeFormat).withZone(timeZone)
+    )
   }
 
   private def addExcerptMarker(body: String):String = {
@@ -225,7 +236,8 @@ class SlackRead(configFile:String) {
   }
 
   def buildPost(messages: List[Message], uidNameMap: Map[String, String]):String = {
-    val head =s"### ${messages.head.name} - ${messages.head.date.toString(postFormat)}s\n"
+    val head =s"### ${messages.head.name} - ${messages.head.date.toString(
+      setup.postFormat)}s\n"
     val body = messages.map(m =>
       markdownMessage(m,uidNameMap)).fold("") {(acc,m)=>s"$acc\n$m"}
     head+body
@@ -251,7 +263,7 @@ class SlackRead(configFile:String) {
           .append(buildPost(m,uidNameMap))
           .append("\n").append("</section>"))
       writePost(
-        e._2.head.head.date.toString(keyFormat) //Date text in JekyllRB post name
+        e._2.head.head.date.toString(config.keyFormat) //Date text in JekyllRB post name
         ,config.postDirectory
         ,s"${config.baseTitle} ${getTitle(e._2.head.head.date)}",builder.toString())
     })

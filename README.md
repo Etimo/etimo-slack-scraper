@@ -15,7 +15,8 @@ Run the application with a -c flag pointing to your config.
 	"startDate":"2017-11-20",
 	"baseTitle":"Teknik-chatt",
 	"blogPeriodBreak":"daily",
-	"mergePeriod":"2"
+	"mergePeriod":"2",
+	"timeZoneId":"default"
 	
 }
 ```
@@ -25,6 +26,9 @@ Run the application with a -c flag pointing to your config.
 - assetDirectory: Images and thumbnails are downloaded here 
 - startDate: Date in YYYY-MM-dd format, messages sent in the channel on this day or later will be included in posts.
 - baseTitle: This is the prefix to all automated post titles.
+- timeZoneId: Id of a timeZone for JodaTime. All post times will be shown using this timezone.
+	- See [JodaTime Zone Ids](http://joda-time.sourceforge.net/timezones.html)). 
+	- Set to "default" to use the timeZone of the system.
 
 - blogPeriodBreak: Determines in what periods posts will be bundled. 
 	- daily - messages from 24h periods starting from startDate will be bundled.	

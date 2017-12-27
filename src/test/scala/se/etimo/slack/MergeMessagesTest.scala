@@ -5,7 +5,7 @@ import org.joda.time.DateTime, se.etimo.slack.SlackRead.Message
 import org.scalatest._
 
 class MergeMessagesTest extends FlatSpec with Matchers {
-  val baseDate = SlackRead.postFormat.parseDateTime("2017-12-17 10:10 30")
+  val baseDate = SlackRead.postFormatBase.parseDateTime("2017-12-17 10:10 30")
   val messages = List(
     Message(baseDate,"Erik","I","xx"),
     Message(baseDate.withDurationAdded(5,1),"Erik","should","xx"),

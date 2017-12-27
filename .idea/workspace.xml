@@ -2,17 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="09c29aac-bddd-4439-9929-5bfcb58968d4" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/se/etimo/slack/MarkdownTweaker.scala" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.README.md.swp" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/se/etimo/slack/EmojiHandler.scala" afterPath="$PROJECT_DIR$/src/main/scala/se/etimo/slack/EmojiHandler.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/se/etimo/slack/FileHandler.scala" afterPath="$PROJECT_DIR$/src/main/scala/se/etimo/slack/FileHandler.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/se/etimo/slack/LinkTools.scala" afterPath="$PROJECT_DIR$/src/main/scala/se/etimo/slack/LinkTools.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/se/etimo/slack/SlackRead.scala" afterPath="$PROJECT_DIR$/src/main/scala/se/etimo/slack/SlackRead.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/EmojiHandlerTest.scala" afterPath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/EmojiHandlerTest.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/FileHandlerTest.scala" afterPath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/FileHandlerTest.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/LinkToolsTest.scala" afterPath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/LinkToolsTest.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala" afterPath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MergeMessagesTest.scala" afterPath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MergeMessagesTest.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/SlackReadTest.scala" afterPath="$PROJECT_DIR$/src/test/scala/se/etimo/slack/SlackReadTest.scala" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/project/project/target/" />
@@ -51,18 +47,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file leaf-file-name="FileHandler.scala" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/FileHandler.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="525">
-              <caret line="193" column="0" lean-forward="false" selection-start-line="193" selection-start-column="0" selection-end-line="193" selection-end-column="0" />
-              <folding>
-                <element signature="e#24#79#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="LinkToolsTest.scala" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/LinkToolsTest.scala">
           <provider selected="true" editor-type-id="text-editor">
@@ -73,11 +57,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SlackRead.scala" pinned="false" current-in-tab="false">
+      <file leaf-file-name="SlackRead.scala" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/SlackRead.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="408">
-              <caret line="173" column="21" lean-forward="false" selection-start-line="173" selection-start-column="21" selection-end-line="173" selection-end-column="21" />
+            <state relative-caret-position="782">
+              <caret line="23" column="10" lean-forward="true" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="10" />
               <folding>
                 <element signature="e#24#43#0" expanded="true" />
               </folding>
@@ -85,11 +69,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="EmojiHandler.scala" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/EmojiHandler.scala">
+      <file leaf-file-name="SlackReadTest.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/SlackReadTest.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="790">
-              <caret line="30" column="8" lean-forward="false" selection-start-line="30" selection-start-column="8" selection-end-line="30" selection-end-column="8" />
+            <state relative-caret-position="918">
+              <caret line="29" column="8" lean-forward="false" selection-start-line="29" selection-start-column="8" selection-end-line="29" selection-end-column="8" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FileHandlerTest.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/FileHandlerTest.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="18" lean-forward="false" selection-start-line="0" selection-start-column="18" selection-end-line="0" selection-end-column="18" />
               <folding>
                 <element signature="e#24#53#0" expanded="true" />
               </folding>
@@ -97,21 +91,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="StringLike.scala" pinned="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.12.3-sources.jar!/scala/collection/immutable/StringLike.scala">
+      <file leaf-file-name="MergeMessagesTest.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/MergeMessagesTest.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="235">
-              <caret line="174" column="74" lean-forward="false" selection-start-line="174" selection-start-column="74" selection-end-line="174" selection-end-column="74" />
+            <state relative-caret-position="170">
+              <caret line="7" column="40" lean-forward="false" selection-start-line="7" selection-start-column="40" selection-end-line="7" selection-end-column="40" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="EmojiHandlerTest.scala" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/EmojiHandlerTest.scala">
+      <file leaf-file-name="StringLike.scala" pinned="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.12.3-sources.jar!/scala/collection/immutable/StringLike.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="7" column="127" lean-forward="false" selection-start-line="7" selection-start-column="127" selection-end-line="7" selection-end-column="127" />
+            <state relative-caret-position="34">
+              <caret line="174" column="74" lean-forward="false" selection-start-line="174" selection-start-column="74" selection-end-line="174" selection-end-column="74" />
               <folding />
             </state>
           </provider>
@@ -120,8 +114,8 @@
       <file leaf-file-name="MarkdownTweakerTest.scala" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="4" column="34" lean-forward="false" selection-start-line="4" selection-start-column="34" selection-end-line="4" selection-end-column="34" />
+            <state relative-caret-position="442">
+              <caret line="13" column="1" lean-forward="false" selection-start-line="13" selection-start-column="1" selection-end-line="13" selection-end-column="1" />
               <folding />
             </state>
           </provider>
@@ -130,7 +124,7 @@
       <file leaf-file-name="MarkdownTweaker.scala" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/MarkdownTweaker.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
+            <state relative-caret-position="1008">
               <caret line="58" column="9" lean-forward="false" selection-start-line="58" selection-start-column="9" selection-end-line="58" selection-end-column="9" />
               <folding>
                 <element signature="e#24#64#0" expanded="true" />
@@ -180,19 +174,19 @@
         <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MergeMessageTest.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/se/etimo/slack/LinkTools.java" />
         <option value="$PROJECT_DIR$/src/main/scala/se/etimo/slack/MergeMessages.scala" />
-        <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MergeMessagesTest.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/Main.scala" />
-        <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/SlackReadTest.scala" />
-        <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/FileHandlerTest.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/se/etimo/slack/MarkdownTweaker.java" />
-        <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/se/etimo/slack/MarkdownTweaker.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/LinkToolsTest.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/se/etimo/slack/LinkTools.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/se/etimo/slack/FileHandler.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/se/etimo/slack/SlackRead.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/EmojiHandlerTest.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/se/etimo/slack/EmojiHandler.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/se/etimo/slack/SlackRead.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/SlackReadTest.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/MergeMessagesTest.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/se/etimo/slack/FileHandlerTest.scala" />
       </list>
     </option>
   </component>
@@ -289,7 +283,7 @@
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="SearchEverywhereHistoryKey" value="Emoji&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/EmojiHandler.scala&#10;Mark&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala&#10;sla&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/SlackRead.scala&#10;Link&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/LinkTools.scala&#10;sbt&#9;ACTION&#9;ActivateSBTToolWindow&#10;Merge&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/test/scala/se/etimo/slack/MergeMessagesTest.scala&#10;slack&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/SlackRead.scala&#10;sb&#9;ACTION&#9;ActivateSBTToolWindow&#10;slackre&#9;null&#9;null&#10;Emoj&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/EmojiHandler.scala&#10;Sla&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/SlackRead.scala&#10;consol&#9;null&#9;null&#10;File&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/test/scala/se/etimo/slack/FileHandlerTest.scala&#10;Main&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/Main.scala&#10;Me&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/test/scala/se/etimo/slack/MergeMessagesTest.scala&#10;LinkTo&#9;null&#9;null&#10;/finalPo&#9;null&#9;null&#10;main&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/Main.scala&#10;scala&#9;null&#9;null&#10;proje&#9;null&#9;null" />
+    <property name="SearchEverywhereHistoryKey" value="File&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/test/scala/se/etimo/slack/FileHandlerTest.scala&#10;merg&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/test/scala/se/etimo/slack/MergeMessagesTest.scala&#10;Emoji&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/EmojiHandler.scala&#10;Mark&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala&#10;sla&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/SlackRead.scala&#10;Link&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/LinkTools.scala&#10;sbt&#9;ACTION&#9;ActivateSBTToolWindow&#10;Merge&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/test/scala/se/etimo/slack/MergeMessagesTest.scala&#10;slack&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/SlackRead.scala&#10;sb&#9;ACTION&#9;ActivateSBTToolWindow&#10;slackre&#9;null&#9;null&#10;Emoj&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/EmojiHandler.scala&#10;Sla&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/se/etimo/slack/SlackRead.scala&#10;consol&#9;null&#9;null&#10;Main&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/Main.scala&#10;Me&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/test/scala/se/etimo/slack/MergeMessagesTest.scala&#10;LinkTo&#9;null&#9;null&#10;/finalPo&#9;null&#9;null&#10;main&#9;FILE&#9;file:///home/erik/code/etimo-slack-blog/src/main/scala/Main.scala&#10;scala&#9;null&#9;null&#10;proje&#9;null&#9;null" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="ScalaTest" />
     <property name="full.screen.before.presentation.mode" value="false" />
@@ -321,7 +315,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="ScalaTest.EmojiHandlerTest">
+  <component name="RunManager" selected="Application.Main">
     <configuration name="EmojiHandlerTest" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <module name="root" />
@@ -498,11 +492,11 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="ScalaTest.EmojiHandlerTest" />
-        <item index="1" class="java.lang.String" itemvalue="Application.Main" />
-        <item index="2" class="java.lang.String" itemvalue="ScalaTest.LinkToolsTest" />
-        <item index="3" class="java.lang.String" itemvalue="ScalaTest.FileHandlerTest" />
-        <item index="4" class="java.lang.String" itemvalue="ScalaTest.MarkdownTweakerTest" />
+        <item index="0" class="java.lang.String" itemvalue="Application.Main" />
+        <item index="1" class="java.lang.String" itemvalue="ScalaTest.MarkdownTweakerTest" />
+        <item index="2" class="java.lang.String" itemvalue="ScalaTest.EmojiHandlerTest" />
+        <item index="3" class="java.lang.String" itemvalue="ScalaTest.LinkToolsTest" />
+        <item index="4" class="java.lang.String" itemvalue="ScalaTest.FileHandlerTest" />
       </list>
     </recent_temporary>
   </component>
@@ -553,21 +547,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="EmojiHandlerTest - 2017.12.27 at 01h 11m 20s.xml">
-      <configuration name="EmojiHandlerTest" configurationId="ScalaTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="EmojiHandlerTest - 2017.12.27 at 01h 15m 47s.xml">
-      <configuration name="EmojiHandlerTest" configurationId="ScalaTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="EmojiHandlerTest - 2017.12.27 at 01h 15m 53s.xml">
-      <configuration name="EmojiHandlerTest" configurationId="ScalaTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="EmojiHandlerTest - 2017.12.27 at 01h 21m 05s.xml">
-      <configuration name="EmojiHandlerTest" configurationId="ScalaTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="EmojiHandlerTest - 2017.12.27 at 01h 27m 42s.xml">
-      <configuration name="EmojiHandlerTest" configurationId="ScalaTestRunConfiguration" />
-    </history-entry>
     <history-entry file="EmojiHandlerTest - 2017.12.27 at 01h 28m 01s.xml">
       <configuration name="EmojiHandlerTest" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
@@ -583,6 +562,21 @@
     <history-entry file="EmojiHandlerTest - 2017.12.27 at 01h 31m 47s.xml">
       <configuration name="EmojiHandlerTest" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
+    <history-entry file="EmojiHandlerTest - 2017.12.27 at 01h 32m 22s.xml">
+      <configuration name="EmojiHandlerTest" configurationId="ScalaTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="EmojiHandlerTest - 2017.12.27 at 19h 42m 45s.xml">
+      <configuration name="EmojiHandlerTest" configurationId="ScalaTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="MarkdownTweakerTest - 2017.12.27 at 19h 42m 52s.xml">
+      <configuration name="MarkdownTweakerTest" configurationId="ScalaTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="MarkdownTweakerTest - 2017.12.27 at 19h 44m 45s.xml">
+      <configuration name="MarkdownTweakerTest" configurationId="ScalaTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="MarkdownTweakerTest - 2017.12.27 at 19h 46m 53s.xml">
+      <configuration name="MarkdownTweakerTest" configurationId="ScalaTestRunConfiguration" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="35" width="3200" height="1765" extended-state="6" />
@@ -590,14 +584,14 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2124665" sideWeight="0.49791667" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="SBT" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0628125" sideWeight="0.49361023" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21149674" sideWeight="0.49791667" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="SBT" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0090625" sideWeight="0.49361023" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5867679" sideWeight="0.5072917" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.422252" sideWeight="0.49583334" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25268096" sideWeight="0.49583334" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -631,12 +625,6 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/FileHandlerTest.scala</url>
-          <line>36</line>
-          <properties />
-          <option name="timeStamp" value="56" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/FileHandler.scala</url>
           <line>20</line>
           <properties />
@@ -650,21 +638,9 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/SlackRead.scala</url>
-          <line>156</line>
+          <line>167</line>
           <properties />
           <option name="timeStamp" value="98" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/EmojiHandler.scala</url>
-          <line>30</line>
-          <properties />
-          <option name="timeStamp" value="100" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/EmojiHandler.scala</url>
-          <line>29</line>
-          <properties />
-          <option name="timeStamp" value="101" />
         </line-breakpoint>
       </breakpoints>
       <option name="time" value="102" />
@@ -858,7 +834,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="54">
           <caret line="3" column="27" lean-forward="false" selection-start-line="3" selection-start-column="27" selection-end-line="3" selection-end-column="27" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -911,25 +886,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/MergeMessagesTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="6" column="55" lean-forward="false" selection-start-line="6" selection-start-column="55" selection-end-line="6" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/SlackReadTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.12.3-sources.jar!/scala/runtime/AbstractFunction0.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
           <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -951,17 +911,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="18">
           <caret line="370" column="54" lean-forward="false" selection-start-line="370" selection-start-column="54" selection-end-line="370" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/FileHandler.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="193" column="0" lean-forward="false" selection-start-line="193" selection-start-column="0" selection-end-line="193" selection-end-column="0" />
-          <folding>
-            <element signature="e#24#79#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -969,17 +918,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="714">
           <caret line="256" column="34" lean-forward="false" selection-start-line="256" selection-start-column="34" selection-end-line="256" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/FileHandlerTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="21" lean-forward="false" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
-          <folding>
-            <element signature="e#24#53#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -987,9 +925,30 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="714">
           <caret line="46" column="17" lean-forward="false" selection-start-line="46" selection-start-column="17" selection-end-line="46" selection-end-column="17" />
-          <folding>
-            <element signature="e#24#79#0" expanded="true" />
-          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="13" column="1" lean-forward="false" selection-start-line="13" selection-start-column="1" selection-end-line="13" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/EmojiHandlerTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="4" column="23" lean-forward="false" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/FileHandler.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="9" column="40" lean-forward="false" selection-start-line="9" selection-start-column="40" selection-end-line="9" selection-end-column="40" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1001,9 +960,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/EmojiHandler.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="824">
+          <caret line="31" column="68" lean-forward="false" selection-start-line="31" selection-start-column="68" selection-end-line="31" selection-end-column="68" />
+          <folding>
+            <element signature="e#24#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.12.3-sources.jar!/scala/collection/immutable/StringLike.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="174" column="74" lean-forward="false" selection-start-line="174" selection-start-column="74" selection-end-line="174" selection-end-column="74" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/MarkdownTweaker.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="1008">
           <caret line="58" column="9" lean-forward="false" selection-start-line="58" selection-start-column="9" selection-end-line="58" selection-end-column="9" />
           <folding>
             <element signature="e#24#64#0" expanded="true" />
@@ -1011,46 +988,38 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/MarkdownTweakerTest.scala">
+    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/SlackReadTest.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="4" column="34" lean-forward="false" selection-start-line="4" selection-start-column="34" selection-end-line="4" selection-end-column="34" />
+        <state relative-caret-position="918">
+          <caret line="29" column="8" lean-forward="false" selection-start-line="29" selection-start-column="8" selection-end-line="29" selection-end-column="8" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.12.3-sources.jar!/scala/collection/immutable/StringLike.scala">
+    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/MergeMessagesTest.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="235">
-          <caret line="174" column="74" lean-forward="false" selection-start-line="174" selection-start-column="74" selection-end-line="174" selection-end-column="74" />
+        <state relative-caret-position="170">
+          <caret line="7" column="40" lean-forward="false" selection-start-line="7" selection-start-column="40" selection-end-line="7" selection-end-column="40" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/FileHandlerTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="18" lean-forward="false" selection-start-line="0" selection-start-column="18" selection-end-line="0" selection-end-column="18" />
+          <folding>
+            <element signature="e#24#53#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/SlackRead.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="173" column="21" lean-forward="false" selection-start-line="173" selection-start-column="21" selection-end-line="173" selection-end-column="21" />
+        <state relative-caret-position="782">
+          <caret line="23" column="10" lean-forward="true" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="10" />
           <folding>
             <element signature="e#24#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/se/etimo/slack/EmojiHandlerTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="7" column="127" lean-forward="false" selection-start-line="7" selection-start-column="127" selection-end-line="7" selection-end-column="127" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/se/etimo/slack/EmojiHandler.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="790">
-          <caret line="30" column="8" lean-forward="false" selection-start-line="30" selection-start-column="8" selection-end-line="30" selection-end-column="8" />
-          <folding>
-            <element signature="e#24#53#0" expanded="true" />
           </folding>
         </state>
       </provider>

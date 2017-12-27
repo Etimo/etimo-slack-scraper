@@ -5,7 +5,7 @@ import org.scalatest._
 import se.etimo.slack.SlackRead.SlackSetup,se.etimo.slack.SlackRead.Message
 
 class SlackReadTest extends FlatSpec with Matchers {
-  val baseDate = SlackRead.postFormat.parseDateTime("2017-12-17 10:10 30")
+  val baseDate = SlackRead.postFormatBase.parseDateTime("2017-12-17 10:10 30")
   val messages = List(
     Message(baseDate,"Erik","I","xx"),
     Message(baseDate.withDurationAdded(5,1),"Erik","should","xx"),
@@ -27,7 +27,7 @@ class SlackReadTest extends FlatSpec with Matchers {
     ,"channel"
     ,DateTime.now()
     ,"Monday"
-    ,null)
+    ,null,null,null,null)
   "Making views" should "merge" in {
 
   }

@@ -33,7 +33,8 @@ val slackFake =
     ,"channel"
     ,DateTime.now()
     ,"Monday"
-    ,null)
+    ,null
+    ,null,null,null)
   val handled = FileHandler.checkFiles(message)
   "Files should" should "Parsed into case class" in {
     assert(handled.isDefined)
