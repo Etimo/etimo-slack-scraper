@@ -1,12 +1,27 @@
 package se.etimo.slack
 
+import java.io.{BufferedOutputStream, FileOutputStream}
+
 import play.api.libs.json._
 
 import scalaj.http.{Http, HttpOptions}
 import se.etimo.slack.SlackRead.SlackSetup
-import slack.api.BlockingSlackApiClient
+
+import scala.language.implicitConversions
+import scala.reflect.io.File
 
 object FileHandler {
+  private val bufferByte =16000
+  val blogPrefix = "blogAssets"
+  def writeFile(bytes: Option[Array[Byte]], file: File):Unit = {
+    bytes.foreach(ba=>{
+      file.parent.createDirectory(true)
+      val out = file.bufferedOutput(false)
+      out.write(ba)
+      out.close()
+    })
+  }
+
 
   /*
   {"type":"message","subtype":"file_share",
@@ -48,16 +63,36 @@ Avtalet för vatten är tex kvartalsbaserat så att den säger att det kostar 54
 
   case class SlackFileInfo(fileId:String,
                            name:String,
+                           size:Long,
                            urlPrivate:String,
                            isPublic:Boolean,
                            mimeType:Option[String],
-                           thumb800:Option[String]=None,
+                           thumb_url:Option[String]=None,
                            preview:Option[String]=None,
                            previewHighlight:Option[String]=None,
                            permalink:Option[String]=None,
-                           permalinkPublic:Option[String]=None,
+                           permaLinkPublic:Option[String]=None,
+                           title:Option[String]=None
                           )
 
+  def slackFileInfoGen(js:JsValue): SlackFileInfo ={
+    val slackInfo = SlackFileInfo(
+      fileId = js \ "id",
+      name = js \ "name",
+      size = (js \ "size").as[Long],
+      urlPrivate = js \ "url_private",
+      isPublic = (js \ "is_public").as[Boolean],
+      mimeType = js \ "mimetype",
+      thumb_url = findThumbUrl(js),
+      preview =  js \ "preview",
+      previewHighlight = js \ "preview_highlight",
+      permalink = js \ "permalink",
+      permaLinkPublic = js \ "permalink_public",
+      title = js \ "title"
+
+    )
+    slackInfo
+  }
   implicit def jsLookupToOpt(value:JsLookupResult):Option[String] = value match{
     case(value:JsDefined) => Option(value.as[String])
     case _ => None
@@ -66,25 +101,19 @@ Avtalet för vatten är tex kvartalsbaserat så att den säger att det kostar 54
     case(value:JsDefined) =>value.as[String]
     case _ => ""
   }
+
+  /**
+    * Calls the sharedPublicUrl file Slack web-api method.
+    * @param file SlackFileInfo object containing file metadata
+    * @param slackSetup Slack setup object containing current token.
+    * @return
+    */
   def generatePublicUrl(file:SlackFileInfo)(implicit slackSetup: SlackSetup):Option[SlackFileInfo] = {
     val result = Http("http://slack.com/api/files.sharedPublicURL")
       .postData("{\"file\":\""+file.fileId+"}")
       .header("Content-Type","application/json; charset=utf-8")
       .header("Authorization",s"Bearer ${slackSetup.token}")
       .option(HttpOptions.readTimeout(10000)).asString
-  if(result.is2xx) {
-    Option(slackFileInfoGen(Json.parse(result.body)))
-  }
-    else{
-    None
-  }
-
-  }
-
-  def downloadFile(file:SlackFileInfo)(implicit slackSetup: SlackSetup):Option[SlackFileInfo] = {
-    val result = Http(file.urlPrivate)
-      .header("Authorization","Bearer "+ slackSetup.token)
-      .option(HttpOptions.readTimeout(10000)).asBytes
     if(result.is2xx) {
       Option(slackFileInfoGen(Json.parse(result.body)))
     }
@@ -93,39 +122,111 @@ Avtalet för vatten är tex kvartalsbaserat så att den säger att det kostar 54
     }
 
   }
+
+  /**
+    * Checks if a file has a thumbnail with correct name exists on the download path
+    * TODO:Include size check.
+    * @param slackFileInfo Info about the file
+    * @param slackSetup Settings provides path to check.
+    * @return true if exists, false otherwise
+    */
+  def checkThumbDownload(slackFileInfo: SlackFileInfo)(implicit slackSetup: SlackSetup): Boolean ={
+    if(!slackFileInfo.thumb_url.isDefined){
+      true
+    }
+    else{
+      val path =  getThumbPath(slackFileInfo)
+      path.exists
+
+    }
+  }
+  def checkFileDownloaded(slackFileInfo: SlackFileInfo)(implicit slackSetup: SlackSetup): Boolean ={
+      val path =  getFilePath(slackFileInfo)
+      path.exists && path.length == slackFileInfo.size
+
+  }
+  def getDownloadFileName(slackFileInfo: SlackFileInfo): String ={
+    s"${slackFileInfo.fileId}-"+slackFileInfo.name.replaceAllLiterally(" ","_")
+  }
+  def getThumbPath(slackFileInfo: SlackFileInfo)(implicit slackSetup: SlackSetup): File ={
+    getPathForFileName("thumbnail-"+getDownloadFileName(slackFileInfo))
+  }
+  def checkDownloaded(slackFileInfo: SlackFileInfo)(implicit slackSetup: SlackSetup): Boolean ={
+    getFilePath(slackFileInfo).exists
+  }
+  def getFilePath(slackFileInfo: SlackFileInfo)(implicit slackSetup: SlackSetup): File ={
+    getPathForFileName(getDownloadFileName(slackFileInfo))
+  }
+  def getPathForFileName(name:String)(implicit slackSetup: SlackSetup): File ={
+    File(s"${slackSetup.assetDirectory}${File.separator}${blogPrefix}${File.separator}${name}")
+  }
+  def checkAndDownloadUrlWithName( url:String,fileName:String)(implicit slackSetup:SlackSetup):String={
+    val file = getPathForFileName(fileName)
+    if(!file.exists){
+      val result = downloadSlackUrl(url)
+      FileHandler.writeFile(result,file)
+      getDownloadedFileUrlBase(fileName)
+    }
+    else{
+    getDownloadedFileUrlBase(fileName)
+    }
+  }
+  def getDownloadedFileUrl(slackFileInfo: SlackFileInfo): String ={
+    getDownloadedFileUrlBase(getDownloadFileName(slackFileInfo))
+  }
+  def getDownloadedFileUrlBase(name: String): String ={
+
+    s"/assets/${blogPrefix}/${name}"
+  }
+  def getDownloadedThumbUrl(slackFileInfo: SlackFileInfo): String ={
+    getDownloadedFileUrlBase(s"thumbnail-${getDownloadFileName(slackFileInfo)}")
+  }
+
+  def downloadSlackUrl(url:String)(implicit slackSetup: SlackSetup):Option[Array[Byte]] = {
+    val result = Http(url)
+      .header("Authorization","Bearer "+ slackSetup.token)
+      .options(HttpOptions.followRedirects(true))
+      .option(HttpOptions.readTimeout(10000)).asBytes
+    if(result.is2xx) {
+      Option(result.body)
+    }
+    else{
+      None
+    }
+  }
+  def downloadThumb(file:SlackFileInfo)(implicit slackSetup: SlackSetup):Option[Array[Byte]] = {
+    downloadSlackUrl(file.thumb_url.getOrElse("NotAUrl"))
+  }
+  def downloadFile(file:SlackFileInfo)(implicit slackSetup: SlackSetup):Option[Array[Byte]] = {
+    downloadSlackUrl(file.urlPrivate)
+  }
   /**
     * Checks json raw message for info on uploaded files.
-    * @param messageJson
+    * @param messageJson <code>JsValue</code> from Slack web API
     * @return
     */
   def checkFiles(messageJson:JsValue): Option[List[SlackFileInfo]] ={
-    val subType = (messageJson \ "subtype")
+    val subType = messageJson \ "subtype"
     subType match {
-      case subType:JsDefined => {
+      case subType:JsDefined =>
         if(subType.as[String] == FILE_TYPE){
           val file = messageJson \ "file"
           Option(List(slackFileInfoGen(file.get)))
         }
         else{
-        None
+          None
         }
-      }
+
       case _ => None
     }
   }
-  def slackFileInfoGen(js:JsValue): SlackFileInfo ={
-    val slackInfo = SlackFileInfo(
-      (js \ "id"),
-      (js \ "name"),
-      (js \ "url_private"),
-      (js \ "is_public").as[Boolean],
-      (js \ "mimetype"),
-      (js \ "preview"),
-      (js \ "preview_highlight"),
-      (js \ "permalink"),
-      (js \ "permalink_public")
-    )
-    slackInfo
+  private def findThumbUrl(js:JsValue,maxSize:Int=800): Option[String] ={
+    val jso = js.asInstanceOf[JsObject]
+    jso.fields.filter(ks => ks._1.matches("thumb_\\d+$"))
+      .map(kj => (kj._1.split('_')(1).toInt,kj._2))
+      .filter(ij => ij._1<=maxSize)
+      .map(ij => ij._2.as[String])
+      .sorted.lastOption
   }
 
 
