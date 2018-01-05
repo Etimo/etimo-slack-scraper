@@ -20,7 +20,7 @@ class EmojiHandler{
     emojiMap.toMap
   }
   val replaceEmojis = getEmojiReplaceMap
-  private val matchEmoji = """:[^:]+:""".r.unanchored
+  private val matchEmoji = """:[^:\n/]+:""".r.unanchored
   def unicodeEmojis(text:String,
                     replacementUnicode:Option[Map[String,String]] = Option(replaceEmojis),
                     replacementImage: Option[Map[String,String]] = None):String = {
