@@ -31,5 +31,6 @@ class SlackReadTest extends FlatSpec with Matchers {
   "Making views" should "merge" in {
 
   }
+  //SlackRead()
 
 }

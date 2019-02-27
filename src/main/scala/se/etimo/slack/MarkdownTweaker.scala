@@ -16,7 +16,13 @@ object MarkdownTweaker {
     private val blockMatcher = "```(\\w+)".r.unanchored
     private val blockMatchStart = ".```".r.unanchored
 
-    def checkMarkdownCodeBlock(text:String): String ={
+  /**
+    * Fixes incompatabilities between Slacks Code blocks and
+    * Jekylls
+    * @param text The blog containing the highlight block
+    * @return
+    */
+  def checkMarkdownCodeBlock(text:String): String ={
         val matches = dumbBlockMatcher.findAllMatchIn(text)
       val blocks = matches.foldLeft((List[HighLightBlock](),Option.empty[Regex.Match]))((o,b) =>{
         if(o._2.isEmpty)(o._1,Option(b))

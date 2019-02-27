@@ -16,7 +16,9 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.math.BigDecimal.RoundingMode
 import scala.util.matching.Regex
+import se.etimo.slack.MarkdownGenerator
 object SlackRead {
+
   val excerpt_separator ="<!--excerpt-->"
   val keyFormatBase:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd")
   val postFormatBase:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-kk hh:mm ss")
@@ -34,7 +36,8 @@ object SlackRead {
                        )
   implicit val system:ActorSystem = ActorSystem("etimoslack")
 
-  val weekdays:Map[String,Int] = Map(("monday",1),
+  val weekdays:Map[String,Int] =
+    Map(("monday",1),
     ("tuesday",2),
     ("wednesday",3),
     ("thursday",4),
@@ -42,6 +45,7 @@ object SlackRead {
     ("saturday",6),
     ("sunday",7))
   val postFormatHour:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd hh:mm")
+
   case class Message(date:DateTime,
                      name:String,
                      text:String,
@@ -154,78 +158,55 @@ class SlackRead(configFile:String) {
     )
   }
 
-  private def addExcerptMarker(body: String):String = {
-    val regexp = "</section".r
-    val sections = regexp.findAllMatchIn(body).toList.sortWith((a,b)=> a.start<b.start)
-    val build = new StringBuilder(body)
-    if(sections.size > 5){
-      build.insert(sections(4).start,s"\n$excerpt_separator\n").toString()
-    }
-    else if(sections.isEmpty){
-      body
-    }
-    else{
-      build.insert(sections.last.start,s"\n$excerpt_separator\n").toString()
-
-    }
-
-
-  }
-
-  def writePost(dateText:String, baseDir: String, title: String, body: String): Unit = {
-    val file = scala.reflect.io.File(baseDir+"/"+dateText+"-"+title.replace(" ","-")+".MARKDOWN")
-    val yamlHead =
-      s"""---
-        |layout: post
-        |title: $title
-        |excerpt_separator: $excerpt_separator
-        |---""".stripMargin
-    val bodyWithExcerpt = addExcerptMarker(body)
-    val finalPost = yamlHead+
-      bodyWithExcerpt
-    println(finalPost)
-    file.writeAll(finalPost)
-
-  }
 
   /**
     * TODO: Add interval option.
     *
     */
   def buildBlogPages():Unit = {
-    val channel = setup.client.listChannels()
-      .find(c => c.name.equals(setup.slackChannel)).get
-    val messages =  new ListBuffer[JsValue]
-    var history = setup.client
-      .getChannelHistory(channel.id,oldest = Option((setup.startDate
-        .getMillis/1000).toString),count = Option(500))
-    messages ++= history.messages
-    while(history.has_more){
-      history = setup.client.getChannelHistory(channel.id,oldest = Option((messages.last \ "ts").as[String]))
-      messages ++= history.messages
-    }
+
+    val messages = getMessages()
     println(s"${messages.size} messages in ${setup.slackChannel}")
     val uidNameMap  = mutable.HashMap[String,String]()
-
     val betterMessages = messages.map( m => {
       println(m)
       createMessage(m,uidNameMap)
     })
-    handleMessages(betterMessages,
+    processMessagesForBlogBuild(
+      betterMessages,
       setup.startDate,uidNameMap.toMap
       ,setup)
   }
+  private def getMessages()={
+
+    val channel = setup.client.listChannels()
+      .find(c => c.name.equals(setup.slackChannel)).get
+    println("Found "+channel)
+    val messages =  new ListBuffer[JsValue]
+
+    var history = setup.client
+      .getChannelHistory(channel.id,oldest = Option((setup.startDate
+        .getMillis/1000).toString),count = Option(500))
+    messages ++= history.messages
+
+    while(history.has_more){
+      Thread.sleep(2000) //Avoid triggering API limits
+      history = setup.client.getChannelHistory(channel.id,oldest = Option((messages.last \ "ts").as[String]))
+      messages ++= history.messages
+    }
+    messages
+  }
 
   /**
-    *
+    * Matches userIds with names of users, handles emojis.
     * @param m
     * @param uidNameMap
     * @return
     */
   private def createMessage(m:JsValue,uidNameMap:mutable.HashMap[String,String]): Message ={
     val userId = (m \ "user").as[String]
-    val name = uidNameMap.getOrElse(userId,
-      setup.client.getUserInfo(userId).name)
+    val name = uidNameMap.getOrElse(userId,getName(userId,setup,300)
+      )
     val text = (m \ "text").as[String]
     val files = FileHandler.checkFiles(m)
     val attachments = LinkTools.getAttachment(m)
@@ -238,24 +219,34 @@ class SlackRead(configFile:String) {
   def buildPost(messages: List[Message], uidNameMap: Map[String, String]):String = {
     val head =s"### ${messages.head.name} - ${messages.head.date.toString(
       setup.postFormat)}s\n"
-    val body = messages.map(m =>
-      markdownMessage(m,uidNameMap)).fold("") {(acc,m)=>s"$acc\n$m"}
+    val body =
+      messages.map(m =>
+      MarkdownGenerator.markdownMessage(setup,m,uidNameMap)).fold("") {(acc,m)=>s"$acc\n$m"}
     head+body
   }
+  def getName(userId:String,setup: SlackSetup,rateLimit:Int): String ={
+    Thread.sleep(rateLimit)
+    val name = setup.client.getUserInfo(userId).name
+    println("Fetched name "+userId+" "+name)
+    name
+  }
 
+  def getDateForTs(ts:String): DateTime ={
+    new DateTime(ts.substring(0,ts.indexOf(".")).toLong*1000)
+  }
 
-  def handleMessages(betterMessages:Seq[Message], getFrom:DateTime,
-                     uidNameMap:Map[String,String], config:SlackSetup):Unit = {
+  def processMessagesForBlogBuild(betterMessages:Seq[Message], getFrom:DateTime,
+                                  uidNameMap:Map[String,String], config:SlackSetup):Unit = {
     //Filter by time
     //val lateMessages = betterMessages.filter(bm => bm.date.toDate.getTime > getFrom.toDate.getTime)
-    val mergedMessages = MergeMessages.mergeMessages(1000*60*5,betterMessages)
+    val mergedMessages = MergeMessages.mergeMessages(1000*60*5,betterMessages) //Combines any messages sufficiently close in time, by the same person.
     val daySeqMap = Map(mergedMessages.sortBy(m=>m.head.date.getMillis)
       .map(m=>m.head.blogKey)
       .distinct.map(dk=>
     {
       (dk,mutable.ListBuffer.empty[List[Message]])
     }) : _*)
-    mergedMessages.foreach(bm => daySeqMap(bm.head.blogKey) += bm)
+    mergedMessages.foreach(bm => daySeqMap(bm.head.blogKey) += bm) //Messages with the same blogkey will be exported into the same post. Here they are grouped in lists.
     daySeqMap.foreach(e => {
       val builder = mutable.StringBuilder.newBuilder
       e._2.sortBy(m=>m.head.date.getMillis)
@@ -269,122 +260,37 @@ class SlackRead(configFile:String) {
     })
   }
 
-  def buildImageElement(f: SlackFileInfo): String = {
-    val url = FileHandler.getDownloadedThumbUrl(f)
-    val fileUrl = FileHandler.getDownloadedFileUrl(f)
-    s"""
-       |<div class="imageblock">
-       |<a href="$fileUrl">
-       |<img alt="${f.name}" src="$url"/>
-       |</a></div>
-       |
-     """.stripMargin
-  }
-
-  def buildPreviewElement(f: SlackFileInfo): String = {
-    val fileUrl = FileHandler.getDownloadedFileUrl(f)
-    s"""
-       |<div class="preview">
-       |<div class="text">
-       |${f.previewHighlight.getOrElse(f.preview)}
-       |</div>
-       |<a href="$fileUrl">${f.name}</a>
-       |</div>
-       |""".stripMargin
-  }
-
-  def buildDownloadElement(f: SlackFileInfo):String = {
-    val fileUrl = FileHandler.getDownloadedFileUrl(f)
-    s"""
-       |<div class="fileblock">
-       |<div class="text">
-       |</div>
-       |<a href="$fileUrl">${f.name}</a>
-       |</div>
-       |""".stripMargin
-  }
-
-  /**
-    *
-    * @param message
-    * @return
-    */
-  def createFileMarkdown(message: Message): String = {
-    message.files.get.map(f => {
-      if(!FileHandler.checkFileDownloaded(f)){
-        //Get file if not downloaded.
-        val fileBytes = FileHandler.downloadFile(f)
-        FileHandler.writeFile(fileBytes,FileHandler.getFilePath(f))
-      }
-      if(f.mimeType.getOrElse("").startsWith("image")){
-        FileHandler.generatePublicUrl(f)
-        if(!FileHandler.checkThumbDownload(f)){
-          val thumb = FileHandler.downloadThumb(f)
-          FileHandler.writeFile(thumb,FileHandler.getThumbPath(f))
-        }
-        f.title.getOrElse("")+"\n"+buildImageElement(f)
-      }
-      else if(f.previewHighlight.isDefined||f.preview.isDefined){
-        buildPreviewElement(f)
-      }
-      else{
-        buildDownloadElement(f)
-      }
-    }).mkString("\n")
+  def writePost(dateText:String, baseDir: String, title: String, body: String): Unit = {
+    val file = scala.reflect.io.File(baseDir+"/"+dateText+"-"+title.replace(" ","-")+".MARKDOWN")
+    val yamlHead =
+      s"""---
+         |layout: post
+         |title: $title
+         |excerpt_separator: $excerpt_separator
+         |---""".stripMargin
+    val bodyWithExcerpt = addExcerptMarker(body)
+    val finalPost = yamlHead+
+      bodyWithExcerpt
+    println(finalPost)
+    file.writeAll(finalPost)
 
   }
 
-  def markdownMessage(message: Message, uidmap:
-  //<section class="message" markdown="1"> - should messages be wrapped?
-  Map[String,String]): String = {
-    val base = checkMessageForAt(message.text,uidmap)
-    if(message.files.isDefined){
-      createFileMarkdown(message)
+  private def addExcerptMarker(body: String):String = {
+    val regexp = "</section".r
+    val sections = regexp.findAllMatchIn(body).toList.sortWith((a,b)=> a.start<b.start)
+    val build = new StringBuilder(body)
+    if(sections.size > 25){
+      build.insert(sections(24).start,s"\n$excerpt_separator\n").toString()
     }
-    else if(message.attachments.isDefined){
-      base.replace("<"," [").replace(">","]")+ message.attachments.get.
-        map(a=>LinkTools.buildAttachmentMarkdown(a)).mkString("\n")
+    else if(sections.isEmpty){
+      body
     }
-    else
-      base.replace("<"," [").replace(">","]")
-  }
-  def getDateForTs(ts:String): DateTime ={
-    new DateTime(ts.substring(0,ts.indexOf(".")).toLong*1000)
-  }
-  def checkMessageForImage(message:String,client:BlockingSlackApiClient) : String = {
-    if(message.contains("uploaded")){
+    else{
+      build.insert(sections.last.start,s"\n$excerpt_separator\n").toString()
 
     }
-    ""
+
+
   }
-  def checkMessageForLink(message:String) :String = {
-    var returnMessage = message
-    message.split("<").foreach(s => {
-      val url = s.split(">")(0)
-      returnMessage = returnMessage.replace(s"<$url>",s"[$url]($url)")
-
-    })
-    returnMessage
-  }
-
-  /**
-    * Check a message for an @ call to another person and
-    * replace it with a markdown compatible.
-    * @param message <code>Message</code> message to check text for @ calls
-    * @param uidToNameMap <code>Map<code> of UID to full username.
-    * @return text from message with any @ calls replaced with usernames.
-    */
-  def checkMessageForAt(message:String,uidToNameMap:Map[String,String]) :String = {
-    var returnMessage = message
-    message.split("<@").foreach(s => {
-      val key = s.split(">")(0)
-      val name = uidToNameMap.get(key)
-      returnMessage = returnMessage.replace(s"<@$key>","@"+name.getOrElse("Unkown"))
-    })
-    returnMessage = checkMessageForLink(returnMessage)
-    returnMessage = MarkdownTweaker.checkMarkdownCodeBlock(returnMessage)
-    returnMessage
-  }
-
-
 }

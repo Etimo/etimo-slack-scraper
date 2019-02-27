@@ -18,15 +18,18 @@ object  CommandLineOption {
   * Will if one of their flags is found store the next N number
   * of fields for further processing.
   */
-class CommandLineOption(val flags:List[String], val fieldsAfterFlag:Int,
+class CommandLineOption(val flags:List[String],
+                        val fieldsAfterFlag:Int,
                         val helpMessage:String,
                         action:Option[List[String] => Unit],
                         checkMethod:Option[List[String] => Boolean])
                        (val triggered:Boolean=false,
                         val readFields:List[String]=List[String]()) {
+
   def runAction(): Unit ={
     action.foreach(x=>x(readFields))
   }
+
   def checkInput(): Boolean ={
     def allTrue(x:List[String]) ={ true }
     checkMethod.getOrElse(allTrue _)(readFields)
