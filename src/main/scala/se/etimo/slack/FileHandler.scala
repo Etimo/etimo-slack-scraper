@@ -1,7 +1,5 @@
 package se.etimo.slack
 
-import java.io.{BufferedOutputStream, FileOutputStream}
-
 import play.api.libs.json._
 
 import scalaj.http.{Http, HttpOptions}
@@ -24,14 +22,13 @@ object FileHandler {
 
 
   val FILE_TYPE = "file_share"
-
   case class SlackFileInfo(fileId:String,
                            name:String,
                            size:Long,
                            urlPrivate:String,
                            isPublic:Boolean,
                            mimeType:Option[String],
-                           thumb_url:Option[String]=None,
+                           thumb_info:Option[(Int,String)]=None,
                            preview:Option[String]=None,
                            previewHighlight:Option[String]=None,
                            permalink:Option[String]=None,
@@ -47,13 +44,12 @@ object FileHandler {
       urlPrivate = js \ "url_private",
       isPublic = (js \ "is_public").as[Boolean],
       mimeType = js \ "mimetype",
-      thumb_url = findThumbUrl(js),
+      thumb_info = findThumbUrl(js),
       preview =  js \ "preview",
       previewHighlight = js \ "preview_highlight",
       permalink = js \ "permalink",
       permaLinkPublic = js \ "permalink_public",
       title = js \ "title"
-
     )
     slackInfo
   }
@@ -95,7 +91,7 @@ object FileHandler {
     * @return true if exists, false otherwise
     */
   def checkThumbDownload(slackFileInfo: SlackFileInfo)(implicit slackSetup: SlackSetup): Boolean ={
-    if(!slackFileInfo.thumb_url.isDefined){
+    if(!slackFileInfo.thumb_info.isDefined){
       true
     }
     else{
@@ -159,7 +155,7 @@ object FileHandler {
     }
   }
   def downloadThumb(file:SlackFileInfo)(implicit slackSetup: SlackSetup):Option[Array[Byte]] = {
-    downloadSlackUrl(file.thumb_url.getOrElse("NotAUrl"))
+    downloadSlackUrl(file.thumb_info.getOrElse((1,"NotAUrl"))._2)
   }
   def downloadFile(file:SlackFileInfo)(implicit slackSetup: SlackSetup):Option[Array[Byte]] = {
     downloadSlackUrl(file.urlPrivate)
@@ -204,13 +200,14 @@ object FileHandler {
       None
     }
   }
-  private def findThumbUrl(js:JsValue,maxSize:Int=800): Option[String] ={
+  private def findThumbUrl(js:JsValue,maxSize:Int=800): Option[(Int,String)] ={
     val jso = js.asInstanceOf[JsObject]
     jso.fields.filter(ks => ks._1.matches("thumb_\\d+$"))
       .map(kj => (kj._1.split('_')(1).toInt,kj._2))
-      .filter(ij => ij._1<=maxSize)
-      .map(ij => ij._2.as[String])
-      .sorted.lastOption
+      .filter(ij => ij._1<=maxSize).sortBy(ij => ij._1)
+      .lastOption
+      .map(ij => (ij._1,ij._2.as[String]))
+
   }
 
 

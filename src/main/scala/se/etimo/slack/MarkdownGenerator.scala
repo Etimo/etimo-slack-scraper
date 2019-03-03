@@ -5,9 +5,9 @@ import se.etimo.slack.SlackRead.{Message, SlackSetup}
 
 object MarkdownGenerator {
 
-  private def buildImageElement(f: SlackFileInfo): String = {
-    val url = FileHandler.getDownloadedThumbUrl(f)
+  private def buildImageElement(f: SlackFileInfo,minThumbSize:Int=800): String = {
     val fileUrl = FileHandler.getDownloadedFileUrl(f)
+    val url = if (f.thumb_info.size >= minThumbSize) FileHandler.getDownloadedThumbUrl(f) else fileUrl
     s"""
        |<div class="imageblock">
        |<a href="$fileUrl">
@@ -58,7 +58,7 @@ object MarkdownGenerator {
           val thumb = FileHandler.downloadThumb(f)
           FileHandler.writeFile(thumb,FileHandler.getThumbPath(f))
         }
-        f.title.getOrElse("")+"\n"+buildImageElement(f)
+        buildImageElement(f)
       }
       else if(f.previewHighlight.isDefined||f.preview.isDefined){
         buildPreviewElement(f)
@@ -78,7 +78,6 @@ object MarkdownGenerator {
     * @return
     */
   def markdownMessage(implicit slackSetup: SlackSetup, inMessage: Message, uidmap:
-  //<section class="message" markdown="1"> - should messages be wrapped?
   Map[String,String]): String = {
     val base = checkMessageForAt(inMessage.text,uidmap)
     if(inMessage.files.isDefined){

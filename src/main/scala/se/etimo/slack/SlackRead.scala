@@ -10,13 +10,13 @@ import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.api.libs.json.JsValue
 import se.etimo.slack.FileHandler.SlackFileInfo
 import se.etimo.slack.LinkTools.Attachment
+import se.etimo.slack.ReactionHandler.Reaction
 import se.etimo.slack.SlackRead._
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.math.BigDecimal.RoundingMode
 import scala.util.matching.Regex
-import se.etimo.slack.MarkdownGenerator
 object SlackRead {
 
   val excerpt_separator ="<!--excerpt-->"
@@ -51,6 +51,7 @@ object SlackRead {
                      text:String,
                      blogKey:String,
                      files:Option[List[SlackFileInfo]]=None,
+                     reactions:Option[List[Reaction]]=None,
                      attachments:Option[List[Attachment]]=None
                     )
 
@@ -130,6 +131,7 @@ class SlackRead(configFile:String) {
   val getTitle:(DateTime)=>String = getBlogTitleGeneratorFunction
   val emojiHandler:EmojiHandler = new EmojiHandler
   val emoticons = emojiHandler.getSlackEmoji(setup)
+  implicit val reactionHandler = new ReactionHandler(emojiHandler,Option(emoticons))
 
   def readConfig(configFile:String="application.conf"): SlackSetup ={
 
@@ -149,7 +151,8 @@ class SlackRead(configFile:String) {
       ,directory
       ,assetDirectory
       ,baseTitle
-      ,keyFormatBase.withZone(timeZone).parseDateTime(startDate)
+      ,keyFormatBase.withZone(timeZone)
+        .parseDateTime(startDate)
       ,blogPeriod
       ,blockingSlackClient
       ,timeZone
@@ -210,18 +213,21 @@ class SlackRead(configFile:String) {
     val text = (m \ "text").as[String]
     val files = FileHandler.checkFiles(m)
     val attachments = LinkTools.getAttachment(m)
+    val reactions = reactionHandler.getReactions(m)
     uidNameMap.put(userId,name)
     val date = getDateForTs((m \ "ts").as[String])
     Message(date,name,emojiHandler.unicodeEmojis(text,replacementImage = Option(emoticons)),
-      getKey(date),files=files,attachments)
+      getKey(date),files,reactions,attachments)
   }
 
-  def buildPost(messages: List[Message], uidNameMap: Map[String, String]):String = {
+  def buildPost(messages: List[Message],uidNameMap: Map[String, String]) :String = {
     val head =s"### ${messages.head.name} - ${messages.head.date.toString(
       setup.postFormat)}s\n"
     val body =
       messages.map(m =>
-      MarkdownGenerator.markdownMessage(setup,m,uidNameMap)).fold("") {(acc,m)=>s"$acc\n$m"}
+        MarkdownGenerator.markdownMessage(setup, m, uidNameMap)
+          .concat(reactionHandler.buildReactionBlock(m.reactions)(uidNameMap))
+      ).fold("") {(acc,m)=>s"$acc\n$m"}
     head+body
   }
   def getName(userId:String,setup: SlackSetup,rateLimit:Int): String ={
@@ -237,8 +243,6 @@ class SlackRead(configFile:String) {
 
   def processMessagesForBlogBuild(betterMessages:Seq[Message], getFrom:DateTime,
                                   uidNameMap:Map[String,String], config:SlackSetup):Unit = {
-    //Filter by time
-    //val lateMessages = betterMessages.filter(bm => bm.date.toDate.getTime > getFrom.toDate.getTime)
     val mergedMessages = MergeMessages.mergeMessages(1000*60*5,betterMessages) //Combines any messages sufficiently close in time, by the same person.
     val daySeqMap = Map(mergedMessages.sortBy(m=>m.head.date.getMillis)
       .map(m=>m.head.blogKey)

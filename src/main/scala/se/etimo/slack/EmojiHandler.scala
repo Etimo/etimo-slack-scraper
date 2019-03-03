@@ -20,6 +20,7 @@ class EmojiHandler{
     emojiMap.toMap
   }
   val replaceEmojis = getEmojiReplaceMap
+
   private val matchEmoji = """:[^:\n/]+:""".r.unanchored
   def unicodeEmojis(text:String,
                     replacementUnicode:Option[Map[String,String]] = Option(replaceEmojis),
@@ -27,16 +28,29 @@ class EmojiHandler{
     var replaced = text;
     matchEmoji.findAllMatchIn(text).foreach(found=> {
       val emoji = found.group(0)
-      replacementUnicode.getOrElse(Map()).get(emoji).foreach(replace =>
-        replaced = replaced.replaceAllLiterally(emoji, replace))
-      replacementImage.getOrElse(Map()).get(emoji).foreach(replace =>
-        replaced=replaced.replaceAllLiterally(emoji, s"![$emoji]($replace)"))
+      replaced = replaceEmojiInText(replaced,emoji,replacementUnicode,replacementImage)
       })
     EmojiParser.parseToUnicode(replaced)
   }
   def getSlackEmoji(slackSetup: SlackSetup)(implicit actorSystem: ActorSystem):Map[String,String] = {
     slackSetup.client.listEmojis()
 
+  }
+   def translateEmoji(emoji:String,
+                                 replacementUnicode:Option[Map[String,String]] = Option(replaceEmojis),
+                                 replacementImage: Option[Map[String,String]] = None):String ={
+    val replace = replaceEmojiInText(emoji,emoji,replacementUnicode,replacementImage)
+    EmojiParser.parseToUnicode(replace)
+  }
+  private def replaceEmojiInText(text:String,emoji:String,
+                    replacementUnicode:Option[Map[String,String]] = Option(replaceEmojis),
+                    replacementImage: Option[Map[String,String]] = None):String ={
+    var replaced = text;
+    replacementUnicode.getOrElse(Map()).get(emoji).foreach(replace =>
+      replaced = replaced.replaceAllLiterally(emoji, replace))
+    replacementImage.getOrElse(Map()).get(emoji).foreach(replace =>
+      replaced=replaced.replaceAllLiterally(emoji, s"![$emoji]($replace)"))
+    return replaced;
   }
 
 }

@@ -42,8 +42,9 @@ val slackFake =
   }
   val file = handled.get.head
   "Thumbnails" should "be retrieved correctly" in {
-    assert(file.thumb_url.isDefined)
-    assert(file.thumb_url.get.contains("800"))
+    assert(file.thumb_info.isDefined)
+    assert(file.thumb_info.get._1 equals  800)
+    assert(file.thumb_info.get._2 contains "800")
   }
   "Non-downloaded files should" should "contain urls but not show as downloaded" in {
       val path = FileHandler.getDownloadedFileUrl(handled.get.head)
