@@ -10,7 +10,7 @@ export HELM_TLS_CA_CERT=deploy/tiller-keys/ca.crt
 export HELM_TLS_CERT=deploy/tiller-keys/tls.crt
 export HELM_TLS_KEY=deploy/tiller-keys/tls.key
 
-mkdir -p deploy/tiller-certs
+mkdir -p deploy/tiller-keys
 kubectl get secret/tiller-secret --output=go-template='{{index .data "ca.crt"}}' | base64 -d > $HELM_TLS_CA_CERT
 kubectl get secret/tiller-secret --output=go-template='{{index .data "tls.crt"}}' | base64 -d > $HELM_TLS_CERT
 kubectl get secret/tiller-secret --output=go-template='{{index .data "tls.key"}}' | base64 -d > $HELM_TLS_KEY
