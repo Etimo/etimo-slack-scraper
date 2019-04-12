@@ -1,12 +1,12 @@
 inThisBuild(List(
               organization := "se.etimo",
-	            scalaVersion := "2.12.3",
-	            version      := "0.1.0-SNAPSHOT"
+	            scalaVersion := "2.12.8",
+              git.useGitDescribe := true,
             ))
 
 name := "Etimo slack static blogger"
 
-enablePlugins(JavaAppPackaging)
+enablePlugins(JavaAppPackaging, GitVersioning)
 
 libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core_2.11" % "2.1.0"
 libraryDependencies += "com.sksamuel.scrimage" % "scrimage-io-extra_2.11" % "2.1.0"
@@ -17,3 +17,5 @@ libraryDependencies += "com.vdurmont"% "emoji-java" % "4.0.0" withJavadoc() with
 libraryDependencies += "com.github.gilbertw1" %% "slack-scala-client" % "0.2.2" withJavadoc() withSources()
 
 run / fork := true
+
+dockerRepository := Some("registry.kubernetes.etimo.se")
