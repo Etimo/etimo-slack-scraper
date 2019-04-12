@@ -57,7 +57,7 @@ spec:
             args:
             - "sh"
             - "-c"
-            - "apk add git openssh-client && cd /blog && git add . && git config user.email 'etimo@etimo.se' && git config user.name 'Etimo AB' && git commit -m 'Auto scrape update' && git push"
+            - "apk add git openssh-client && cd /blog && git add . && git config user.email 'etimo@etimo.se' && git config user.name 'Etimo AB' && git commit -m 'Auto scrape update' || true && git push || true"
             volumeMounts:
             - name: blog
               mountPath: /blog
