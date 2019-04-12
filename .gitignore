@@ -3,4 +3,4 @@ target
 project/target
 .idea/
 .gradle
-deploy/tiller-certs
+deploy/tiller-keys
