@@ -19,6 +19,7 @@ kubectl get secret/tiller-secret --output=go-template='{{index .data "tls.key"}}
 if [ "$CI" = 1 ]; then
     sudo mkdir -p /etc/docker/certs.d
     sudo cp --recursive deploy/registry-certs /etc/docker/certs.d/registry.kubernetes.etimo.se
+    sudo systemctl restart docker
 fi
 
 sbt docker:publish kubernetesHelmImageValues
