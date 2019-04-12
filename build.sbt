@@ -19,3 +19,16 @@ libraryDependencies += "com.github.gilbertw1" %% "slack-scala-client" % "0.2.2" 
 run / fork := true
 
 dockerRepository := Some("registry.kubernetes.etimo.se")
+
+val kubernetesHelmImageValues = taskKey[File]("A Helm values.yaml file containing all image references")
+kubernetesHelmImageValues := {
+  import _root_.io.circe.Json
+  val values = Json.obj(
+    "images" -> Json.obj(
+      packageName.value.replace("-", "_") -> Json.fromString(dockerAlias.value.toString)
+    )
+  )
+  val file = target.value / "helm-images.yaml"
+  IO.write(file, values.spaces2)
+  file
+}
