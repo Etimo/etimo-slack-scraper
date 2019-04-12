@@ -3,3 +3,4 @@ target
 project/target
 .idea/
 .gradle
+deploy/tiller-certs
