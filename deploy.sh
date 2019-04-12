@@ -15,13 +15,6 @@ kubectl get secret/tiller-secret --output=go-template='{{index .data "ca.crt"}}'
 kubectl get secret/tiller-secret --output=go-template='{{index .data "tls.crt"}}' | base64 -d > $HELM_TLS_CERT
 kubectl get secret/tiller-secret --output=go-template='{{index .data "tls.key"}}' | base64 -d > $HELM_TLS_KEY
 
-# Don't muck around with registry certs on non-CI machines, since Docker requires us to set it system-wide
-if [ "$CI" = 1 ]; then
-    sudo mkdir -p /etc/docker/certs.d
-    sudo cp --recursive deploy/registry-certs /etc/docker/certs.d/registry.kubernetes.etimo.se
-    sudo systemctl restart docker
-fi
-
 sbt docker:publish kubernetesHelmImageValues
 helm init --client-only
 helm upgrade slack-scraper charts/etimo-slack-scraper --install --namespace slack-scraper --values target/helm-images.yaml

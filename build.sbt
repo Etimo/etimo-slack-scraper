@@ -20,6 +20,25 @@ run / fork := true
 
 dockerRepository := Some("registry.kubernetes.etimo.se")
 
+val dockerRegistryCertDir = settingKey[File]("Directory containing registry certificates and settings")
+dockerRegistryCertDir := file("deploy/registry-keys")
+
+// Skopeo supports client TLS without requiring daemon config changes
+inConfig(Docker)(publish := {
+  val _ = publishLocal.value
+  val log = streams.value.log
+  val registryCertOpts = Seq("--dest-cert-dir", dockerRegistryCertDir.value.toString)
+  dockerAliases.value.foreach { tag =>
+    val cmd = Seq("skopeo", "copy") ++ registryCertOpts ++ Seq(s"docker-daemon:$tag", s"docker://$tag")
+    log.debug("Executing " + cmd.mkString(" "))
+    val ret = sys.process.Process(cmd).! // publishLogger(log)
+    if (ret != 0)
+      sys.error("Nonzero exit value: " + ret)
+    else
+      log.info("Published image " + tag)
+  }
+})
+
 val kubernetesHelmImageValues = taskKey[File]("A Helm values.yaml file containing all image references")
 kubernetesHelmImageValues := {
   import _root_.io.circe.Json
