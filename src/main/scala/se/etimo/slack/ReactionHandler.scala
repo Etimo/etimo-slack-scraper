@@ -3,6 +3,7 @@ package se.etimo.slack
 import play.api.libs.json.JsValue
 import se.etimo.slack.ReactionHandler.Reaction
 import play.api.libs.json._
+import scala.collection.JavaConverters._
 
 /**
   * Handles reactions for files, currently this shares code with the emoji-lookup, reactions will simply be appended
@@ -21,10 +22,18 @@ class ReactionHandler(emojiHandler:EmojiHandler,emoticons:Option[Map[String,Stri
 
   implicit val readReaction = Json.reads[Reaction]
 
+  def slackReactionToLocalReactionGen(r: com.slack.api.model.Reaction): Reaction ={
+    Reaction(r.getName,r.getUsers.asScala.toList,r.getCount())
+  }
+
   def getReactions(jsonMessage:JsValue) = {
 
     val lookup =(jsonMessage \ "reactions")
     if (lookup.isDefined) Option(lookup.get.as[List[Reaction]]) else Option.empty
+  }
+
+  def getReactions(message:com.slack.api.model.Message) = {
+    Option(message.getReactions().asScala.map(r => slackReactionToLocalReactionGen(r)).toList)
   }
 
   def buildReactionBlock(reactions:Option[List[Reaction]])(implicit usernameMap:Map[String,String]):String= {

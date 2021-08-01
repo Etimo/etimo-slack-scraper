@@ -1,9 +1,11 @@
 package se.etimo.slack
 
 import akka.actor.ActorSystem
+import com.slack.api.methods.request.emoji.EmojiListRequest
 import com.typesafe.config.ConfigFactory
 import com.vdurmont.emoji.EmojiParser
 import se.etimo.slack.SlackRead.SlackSetup
+import scala.collection.JavaConverters._
 
 import scala.collection.mutable;
 
@@ -33,7 +35,9 @@ class EmojiHandler{
     EmojiParser.parseToUnicode(replaced)
   }
   def getSlackEmoji(slackSetup: SlackSetup)(implicit actorSystem: ActorSystem):Map[String,String] = {
-    slackSetup.client.listEmojis()
+    Option(slackSetup.methodsClient.emojiList(EmojiListRequest.builder().build()))
+      .map(er => er.getEmoji.asScala.map((e)=> (e._1.toString(), e._2.toString)).toMap)
+      .getOrElse(Map())
 
   }
    def translateEmoji(emoji:String,

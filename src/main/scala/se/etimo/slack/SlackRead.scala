@@ -1,22 +1,27 @@
 package se.etimo.slack
 
 import java.io.File
-
 import com.typesafe.config.ConfigFactory
 import slack.api.BlockingSlackApiClient
 import akka.actor.ActorSystem
+import com.slack.api.methods.MethodsClient
+import com.slack.api.methods.request.conversations.{ConversationsHistoryRequest, ConversationsListRequest}
+import com.slack.api.methods.request.users.UsersInfoRequest
+import com.slack.api.model.Conversation
 import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.api.libs.json.JsValue
-import se.etimo.slack.FileHandler.SlackFileInfo
+import se.etimo.slack.reimplemented.FileHandler.SlackFileInfo
 import se.etimo.slack.LinkTools.Attachment
 import se.etimo.slack.ReactionHandler.Reaction
 import se.etimo.slack.SlackRead._
+import se.etimo.slack.reimplemented.FileHandler
 
-import scala.collection.mutable
+import scala.collection.{JavaConverters, mutable}
 import scala.collection.mutable.ListBuffer
 import scala.math.BigDecimal.RoundingMode
 import scala.util.matching.Regex
+import collection.JavaConverters._
 object SlackRead {
 
   val excerpt_separator ="<!--excerpt-->"
@@ -29,21 +34,21 @@ object SlackRead {
                         baseTitle:String,
                         startDate:DateTime,
                         blogPeriod:String,
-                        client:BlockingSlackApiClient,
                         timeZone:DateTimeZone,
                         keyFormat:DateTimeFormatter,
                         postFormat:DateTimeFormatter,
+                        methodsClient: MethodsClient
                        )
   implicit val system:ActorSystem = ActorSystem("etimoslack")
 
   val weekdays:Map[String,Int] =
     Map(("monday",1),
-    ("tuesday",2),
-    ("wednesday",3),
-    ("thursday",4),
-    ("friday",5),
-    ("saturday",6),
-    ("sunday",7))
+      ("tuesday",2),
+      ("wednesday",3),
+      ("thursday",4),
+      ("friday",5),
+      ("saturday",6),
+      ("sunday",7))
   val postFormatHour:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd hh:mm")
 
   case class Message(date:DateTime,
@@ -146,7 +151,7 @@ class SlackRead(configFile:String) {
     val postDateTimeFormat = config.getString("postDateTimeFormat")
     val timeZoneId = config.getString("timeZoneId")
     val timeZone = if(timeZoneId == "default") DateTimeZone.getDefault else DateTimeZone.forID(timeZoneId)
-    val blockingSlackClient = BlockingSlackApiClient(token)
+    val methodsClient = com.slack.api.Slack.getInstance().methods(token);
     SlackSetup(token,slackChannel
       ,directory
       ,assetDirectory
@@ -154,10 +159,10 @@ class SlackRead(configFile:String) {
       ,keyFormatBase.withZone(timeZone)
         .parseDateTime(startDate)
       ,blogPeriod
-      ,blockingSlackClient
       ,timeZone
       ,keyFormatBase.withZone(timeZone)
-      ,DateTimeFormat.forPattern(postDateTimeFormat).withZone(timeZone)
+      ,DateTimeFormat.forPattern(postDateTimeFormat).withZone(timeZone),
+      methodsClient
     )
   }
 
@@ -180,22 +185,30 @@ class SlackRead(configFile:String) {
       setup.startDate,uidNameMap.toMap
       ,setup)
   }
+
   private def getMessages()={
 
-    val channel = setup.client.listChannels()
-      .find(c => c.name.equals(setup.slackChannel)).get
-    println("Found "+channel)
-    val messages =  new ListBuffer[JsValue]
+    val channel = setup.methodsClient.conversationsList(
+      ConversationsListRequest.builder().build()
+    ).getChannels().stream()
+      .filter(c => c.getName().equals(setup.slackChannel)).findFirst()
+      .orElseThrow(() => new RuntimeException("No channel matching specied name found"))
+    println("Found channel id: "+channel.getId())
+    val messages =  new ListBuffer[com.slack.api.model.Message]
 
-    var history = setup.client
-      .getChannelHistory(channel.id,oldest = Option((setup.startDate
-        .getMillis/1000).toString),count = Option(500))
-    messages ++= history.messages
+    var history = setup.methodsClient
+      .conversationsHistory(
+        ConversationsHistoryRequest.builder().channel(channel.getId())
+          .oldest(setup.startDate.getMillis.toString()).limit(500).build())
+    messages ++= history.getMessages().asScala
 
-    while(history.has_more){
+    while(history.isHasMore){
       Thread.sleep(2000) //Avoid triggering API limits
-      history = setup.client.getChannelHistory(channel.id,oldest = Option((messages.last \ "ts").as[String]))
-      messages ++= history.messages
+      var history = setup.methodsClient
+        .conversationsHistory(
+          ConversationsHistoryRequest.builder().channel(channel.getId())
+            .oldest(messages.last.getTs()).limit(500).build())
+      messages ++= history.getMessages().asScala
     }
     messages
   }
@@ -206,16 +219,19 @@ class SlackRead(configFile:String) {
     * @param uidNameMap
     * @return
     */
-  private def createMessage(m:JsValue,uidNameMap:mutable.HashMap[String,String]): Message ={
-    val userId = (m \ "user").as[String]
+  private def createMessage(m:com.slack.api.model.Message,uidNameMap:mutable.HashMap[String,String]): Message ={
+    val userId = m.getUser
     val name = uidNameMap.getOrElse(userId,getName(userId,setup,300)
-      )
-    val text = (m \ "text").as[String]
+    )
+    val text = m.getText
     val files = FileHandler.checkFiles(m)
-    val attachments = LinkTools.getAttachment(m)
+    val attachments = Option(m.getAttachments().asScala).map(a => a.map(
+      a => Attachment(a.getTitle(), a.getTitleLink, Option(a.getText), Option(a.getImageUrl), Option(a.getThumbUrl))
+    ).toList
+    )
     val reactions = reactionHandler.getReactions(m)
     uidNameMap.put(userId,name)
-    val date = getDateForTs((m \ "ts").as[String])
+    val date = getDateForTs(m.getTs())
     Message(date,name,emojiHandler.unicodeEmojis(text,replacementImage = Option(emoticons)),
       getKey(date),files,reactions,attachments)
   }
@@ -232,7 +248,8 @@ class SlackRead(configFile:String) {
   }
   def getName(userId:String,setup: SlackSetup,rateLimit:Int): String ={
     Thread.sleep(rateLimit)
-    val name = setup.client.getUserInfo(userId).name
+    val nameResponse = setup.methodsClient.usersInfo(UsersInfoRequest.builder().user(userId).build())
+    val name = Option(nameResponse).filter(m => m.isOk).map(m => m.getUser()).map(m=>m.getName()).getOrElse(userId)
     println("Fetched name "+userId+" "+name)
     name
   }

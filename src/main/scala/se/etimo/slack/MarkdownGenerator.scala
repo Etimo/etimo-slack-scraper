@@ -1,7 +1,8 @@
 package se.etimo.slack
 
-import se.etimo.slack.FileHandler.SlackFileInfo
+import se.etimo.slack.reimplemented.FileHandler.SlackFileInfo
 import se.etimo.slack.SlackRead.{Message, SlackSetup}
+import se.etimo.slack.reimplemented.FileHandler
 
 object MarkdownGenerator {
 
