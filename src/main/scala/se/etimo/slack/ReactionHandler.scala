@@ -33,7 +33,7 @@ class ReactionHandler(emojiHandler:EmojiHandler,emoticons:Option[Map[String,Stri
   }
 
   def getReactions(message:com.slack.api.model.Message) = {
-    Option(message.getReactions().asScala.map(r => slackReactionToLocalReactionGen(r)).toList)
+    Option(message.getReactions()).map(m => m.asScala.map(r => slackReactionToLocalReactionGen(r)).toList)
   }
 
   def buildReactionBlock(reactions:Option[List[Reaction]])(implicit usernameMap:Map[String,String]):String= {

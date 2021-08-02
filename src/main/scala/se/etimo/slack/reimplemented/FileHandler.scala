@@ -215,7 +215,7 @@ object FileHandler {
     * @return
     */
   def checkFiles(message : com.slack.api.model.Message): Option[List[SlackFileInfo]] = {
-    if(message.getSubtype().matches("file")){
+    if(Option(message.getSubtype()).map(s => s.matches("file")).getOrElse(false)){
       Option(List(slackFileInfoGen(message.getFile())))
     }
     else {
