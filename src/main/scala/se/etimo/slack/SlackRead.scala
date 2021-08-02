@@ -7,7 +7,7 @@ import akka.actor.ActorSystem
 import com.slack.api.methods.MethodsClient
 import com.slack.api.methods.request.conversations.{ConversationsHistoryRequest, ConversationsListRequest}
 import com.slack.api.methods.request.users.UsersInfoRequest
-import com.slack.api.model.Conversation
+import com.slack.api.model.{Conversation, ConversationType}
 import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.api.libs.json.JsValue
@@ -188,18 +188,21 @@ class SlackRead(configFile:String) {
 
   private def getMessages()={
 
-    val channel = setup.methodsClient.conversationsList(
-      ConversationsListRequest.builder().build()
-    ).getChannels().stream()
+    val channels = setup.methodsClient.conversationsList(
+      ConversationsListRequest.builder()
+        .build()
+    )
+    val channel = channels.getChannels().stream()
       .filter(c => c.getName().equals(setup.slackChannel)).findFirst()
       .orElseThrow(() => new RuntimeException("No channel matching specied name found"))
     println("Found channel id: "+channel.getId())
     val messages =  new ListBuffer[com.slack.api.model.Message]
-
+    val epochStart = (setup.startDate.getMillis/1000)+"";
     var history = setup.methodsClient
       .conversationsHistory(
         ConversationsHistoryRequest.builder().channel(channel.getId())
-          .oldest(setup.startDate.getMillis.toString()).limit(500).build())
+          .oldest(epochStart)
+          .limit(500).build())
     messages ++= history.getMessages().asScala
 
     while(history.isHasMore){
