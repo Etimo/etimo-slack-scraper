@@ -1,7 +1,7 @@
 package se.etimo.slack
 
 import se.etimo.slack.reimplemented.FileHandler.SlackFileInfo
-import se.etimo.slack.SlackRead.{Message, SlackSetup}
+import se.etimo.slack.SlackRead.{BlogMessage, SlackSetup}
 import se.etimo.slack.reimplemented.FileHandler
 
 object MarkdownGenerator {
@@ -46,7 +46,7 @@ object MarkdownGenerator {
     * @param message
     * @return
     */
-   def createFileMarkdown(message: Message)(implicit slackSetup:SlackSetup): String = {
+   def createFileMarkdown(message: BlogMessage)(implicit slackSetup:SlackSetup): String = {
     message.files.get.map(f => {
       if(!FileHandler.checkFileDownloaded(f)){
         //Get file if not downloaded.
@@ -78,7 +78,7 @@ object MarkdownGenerator {
     * @param uidmap Map of userIds to usernames
     * @return
     */
-  def markdownMessage(implicit slackSetup: SlackSetup, inMessage: Message, uidmap:
+  def markdownMessage(implicit slackSetup: SlackSetup, inMessage: BlogMessage, uidmap:
   Map[String,String]): String = {
     val base = checkMessageForAt(inMessage.text,uidmap)
     if(inMessage.files.isDefined){

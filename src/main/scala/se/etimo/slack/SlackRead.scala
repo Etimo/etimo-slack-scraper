@@ -2,22 +2,20 @@ package se.etimo.slack
 
 import java.io.File
 import com.typesafe.config.ConfigFactory
-import slack.api.BlockingSlackApiClient
 import akka.actor.ActorSystem
 import com.slack.api.methods.MethodsClient
-import com.slack.api.methods.request.conversations.{ConversationsHistoryRequest, ConversationsListRequest}
+import com.slack.api.methods.request.conversations.{ConversationsHistoryRequest, ConversationsListRequest, ConversationsRepliesRequest}
 import com.slack.api.methods.request.users.UsersInfoRequest
-import com.slack.api.model.{Conversation, ConversationType}
+import com.slack.api.model.Message
 import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
-import play.api.libs.json.JsValue
 import se.etimo.slack.reimplemented.FileHandler.SlackFileInfo
 import se.etimo.slack.LinkTools.Attachment
 import se.etimo.slack.ReactionHandler.Reaction
 import se.etimo.slack.SlackRead._
 import se.etimo.slack.reimplemented.FileHandler
 
-import scala.collection.{JavaConverters, mutable}
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.math.BigDecimal.RoundingMode
 import scala.util.matching.Regex
@@ -51,13 +49,13 @@ object SlackRead {
       ("sunday",7))
   val postFormatHour:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd hh:mm")
 
-  case class Message(date:DateTime,
-                     name:String,
-                     text:String,
-                     blogKey:String,
-                     files:Option[List[SlackFileInfo]]=None,
-                     reactions:Option[List[Reaction]]=None,
-                     attachments:Option[List[Attachment]]=None
+  case class BlogMessage(date:DateTime,
+                         name:String,
+                         text:String,
+                         blogKey:String,
+                         files:Option[List[SlackFileInfo]]=None,
+                         reactions:Option[List[Reaction]]=None,
+                         attachments:Option[List[Attachment]]=None
                     )
 
   private val numeric:Regex = "^[1-9]+$".r
@@ -176,9 +174,9 @@ class SlackRead(configFile:String) {
     val messages = getMessages()
     println(s"${messages.size} messages in ${setup.slackChannel}")
     val uidNameMap  = mutable.HashMap[String,String]()
-    val betterMessages = messages.map( m => {
+    val betterMessages = messages.flatMap( m => {
       println(m)
-      createMessage(m,uidNameMap)
+      m.map(mess => createMessage(mess,uidNameMap))
     })
     processMessagesForBlogBuild(
       betterMessages,
@@ -194,7 +192,7 @@ class SlackRead(configFile:String) {
     )
     val channel = channels.getChannels().stream()
       .filter(c => c.getName().equals(setup.slackChannel)).findFirst()
-      .orElseThrow(() => new RuntimeException("No channel matching specied name found"))
+      .orElseThrow(() => new RuntimeException("No channel matching specified name found"))
     println("Found channel id: "+channel.getId())
     val messages =  new ListBuffer[com.slack.api.model.Message]
     val epochStart = (setup.startDate.getMillis/1000)+"";
@@ -203,7 +201,9 @@ class SlackRead(configFile:String) {
         ConversationsHistoryRequest.builder().channel(channel.getId())
           .oldest(epochStart)
           .limit(500).build())
+
     messages ++= history.getMessages().asScala
+
 
     while(history.isHasMore){
       Thread.sleep(2000) //Avoid triggering API limits
@@ -213,16 +213,32 @@ class SlackRead(configFile:String) {
             .oldest(messages.last.getTs()).limit(500).build())
       messages ++= history.getMessages().asScala
     }
-    messages
+    val threads = messages.map(m => getNestedMessages(m,channel.getId))
+    threads;
   }
 
+  private def getNestedMessages(message: Message, channel:String): mutable.Buffer[Message]={
+    if(message.getReplyCount == 0){
+      return mutable.Buffer()
+    }
+
+    val messages =  setup.methodsClient.conversationsReplies(
+      ConversationsRepliesRequest.builder()
+        .channel(channel)
+        .inclusive(true)
+        .ts(message.getTs)
+        .build()).getMessages
+      .asScala
+    messages
+
+  }
   /**
     * Matches userIds with names of users, handles emojis.
     * @param m
     * @param uidNameMap
     * @return
     */
-  private def createMessage(m:com.slack.api.model.Message,uidNameMap:mutable.HashMap[String,String]): Message ={
+  private def createMessage(m:com.slack.api.model.Message,uidNameMap:mutable.HashMap[String,String]): BlogMessage ={
     val userId = m.getUser
     val name = uidNameMap.getOrElse(userId,getName(userId,setup,300)
     )
@@ -235,11 +251,11 @@ class SlackRead(configFile:String) {
     val reactions = reactionHandler.getReactions(m)
     uidNameMap.put(userId,name)
     val date = getDateForTs(m.getTs())
-    Message(date,name,emojiHandler.unicodeEmojis(text,replacementImage = Option(emoticons)),
+    BlogMessage(date,name,emojiHandler.unicodeEmojis(text,replacementImage = Option(emoticons)),
       getKey(date),files,reactions,attachments)
   }
 
-  def buildPost(messages: List[Message],uidNameMap: Map[String, String]) :String = {
+  def buildPost(messages: List[BlogMessage], uidNameMap: Map[String, String]) :String = {
     val head =s"### ${messages.head.name} - ${messages.head.date.toString(
       setup.postFormat)}s\n"
     val body =
@@ -261,14 +277,14 @@ class SlackRead(configFile:String) {
     new DateTime(ts.substring(0,ts.indexOf(".")).toLong*1000)
   }
 
-  def processMessagesForBlogBuild(betterMessages:Seq[Message], getFrom:DateTime,
+  def processMessagesForBlogBuild(betterMessages:Seq[BlogMessage], getFrom:DateTime,
                                   uidNameMap:Map[String,String], config:SlackSetup):Unit = {
     val mergedMessages = MergeMessages.mergeMessages(1000*60*5,betterMessages) //Combines any messages sufficiently close in time, by the same person.
     val daySeqMap = Map(mergedMessages.sortBy(m=>m.head.date.getMillis)
       .map(m=>m.head.blogKey)
       .distinct.map(dk=>
     {
-      (dk,mutable.ListBuffer.empty[List[Message]])
+      (dk,mutable.ListBuffer.empty[List[BlogMessage]])
     }) : _*)
     mergedMessages.foreach(bm => daySeqMap(bm.head.blogKey) += bm) //Messages with the same blogkey will be exported into the same post. Here they are grouped in lists.
     daySeqMap.foreach(e => {
